@@ -53,6 +53,7 @@ struct AppInfo {
     last_note: Option<String>,
     note_count: usize,
     mcp_port: Option<u16>,
+    theme: String,
 }
 
 #[derive(Serialize, Clone)]
@@ -173,6 +174,7 @@ fn app_info_of(state: &State<AppState>) -> AppInfo {
         last_note: cfg.last_note.clone(),
         note_count: n,
         mcp_port: cfg.mcp_port,
+        theme: cfg.theme.clone(),
     }
 }
 
@@ -515,6 +517,15 @@ fn set_last_note(state: State<AppState>, rel: Option<String>) -> Result<(), Erro
     Ok(())
 }
 
+/// Simpan tema pilihan user (light/dark) ke config.
+#[tauri::command]
+fn set_theme(state: State<AppState>, theme: String) -> Result<(), ErrorJson> {
+    let mut cfg = state.config.lock().unwrap();
+    cfg.theme = if theme == "light" { "light".into() } else { "dark".into() };
+    cfg.save().map_err(err)?;
+    Ok(())
+}
+
 /// Buka Graph View di window TERPISAH (bukan overlay).
 /// Bila sudah terbuka, window yang ada difokuskan.
 #[tauri::command]
@@ -582,6 +593,7 @@ pub fn run() {
             graph_data,
             resolve_link,
             set_last_note,
+            set_theme,
             open_graph_window,
             all_notes,
             apply_external_changes

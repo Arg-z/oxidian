@@ -3,6 +3,10 @@
  * zoom/pan dengan easing, animasi spawn, hover yang lerp. */
 "use strict";
 
+// tema mengikuti pilihan di jendela utama (disimpan localStorage)
+document.documentElement.dataset.theme =
+  localStorage.getItem("oxidian-theme") === "dark" ? "dark" : "light";
+
 const { invoke } = window.__TAURI__.core;
 const { emit, listen } = window.__TAURI__.event;
 

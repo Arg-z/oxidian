@@ -92,9 +92,26 @@ $("modal-input").addEventListener("keydown", (e) => {
 /* ============================================================
  * BOOT & VAULT
  * ============================================================ */
+/* ---------- tema terang/gelap ---------- */
+function applyTheme(theme) {
+  const t = theme === "light" ? "light" : "dark";
+  document.documentElement.dataset.theme = t;
+  // label = tema tujuan (aksi), aman untuk semua font
+  $("btn-theme").textContent = t === "light" ? "Dark" : "Terang";
+  $("btn-theme").title = t === "light" ? "Ganti ke tema gelap" : "Ganti ke tema terang";
+  localStorage.setItem("oxidian-theme", t);
+}
+
+$("btn-theme").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  applyTheme(next);
+  cmd("set_theme", { theme: next }).catch(() => {});
+});
+
 async function boot() {
   const info = await cmd("app_info");
   state.recentVaults = info.recent_vaults || [];
+  applyTheme(info.theme);
   if (info.vault) {
     // backend sudah punya vault aktif (tak mungkin saat boot, tapi aman)
     await enterVault(info.vault, info.last_note);
@@ -215,8 +232,8 @@ function buildTreeNodes(nodes, prefix) {
     item.dataset.path = n.path;
     if (n.type === "dir") {
       const open = state.treeOpen.has(n.path);
-      item.appendChild(el("span", "caret", open ? "▾" : "▸"));
-      item.appendChild(el("span", "icon", "📁"));
+      const caret = el("span", "caret" + (open ? " open" : ""), "▸");
+      item.appendChild(caret);
       item.appendChild(el("span", "label", n.name));
       const acts = el("div", "row-actions");
       const bNew = el("button", null, "＋");
@@ -238,7 +255,6 @@ function buildTreeNodes(nodes, prefix) {
       if (open) wrap.appendChild(buildTreeNodes(n.children, n.path + "/"));
     } else {
       item.appendChild(el("span", "caret", ""));
-      item.appendChild(el("span", "icon", "📄"));
       item.appendChild(el("span", "label", n.name));
       const acts = el("div", "row-actions");
       const bRen = el("button", null, "✎");
@@ -474,7 +490,8 @@ function renderPreview(note) {
   const md = preprocessWikilinks(note.content.startsWith("---") ? stripFm(note.content) : note.content);
   const parsed = marked.parse(md);
   html += DOMPurify.sanitize(parsed, { ADD_ATTR: ["data-target", "data-heading"] });
-  prev.innerHTML = html;
+  // bungkus agar konten ter-center dengan lebar baca nyaman
+  prev.innerHTML = `<div class="preview-inner">${html}</div>`;
   prev.querySelectorAll("a.wikilink").forEach((a) => {
     a.addEventListener("click", () => followLink(a.dataset.target, a.dataset.heading || null));
   });
