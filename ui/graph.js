@@ -173,11 +173,12 @@ function drawFrame() {
     ctx.globalAlpha = ready * easeOutCubic(n.spawn);
     ctx.beginPath();
     ctx.arc(n.x, n.y, n._dr, 0, Math.PI * 2);
-    ctx.fillStyle = hot ? "#c9b3ff" : "#7c5cff";
+    const dark = document.documentElement.dataset.theme === "dark";
+    ctx.fillStyle = hot ? "#9db9ff" : (dark ? "#6f97f2" : "#2e6be6");
     ctx.fill();
-    if (hot) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke(); }
+    if (hot) { ctx.strokeStyle = dark ? "#fff" : "#1f5cd6"; ctx.lineWidth = 1.5; ctx.stroke(); }
     if (scale > 0.55 || hot) {
-      ctx.fillStyle = hot ? "#fff" : "rgba(220,215,235,0.75)";
+      ctx.fillStyle = hot ? (dark ? "#fff" : "#0d2a66") : (dark ? "rgba(215,222,240,0.8)" : "rgba(50,55,70,0.78)");
       ctx.font = "11px sans-serif";
       ctx.fillText(n.title, n.x + n._dr + 3, n.y + 4);
     }

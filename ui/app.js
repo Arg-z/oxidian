@@ -322,6 +322,7 @@ async function openNote(rel) {
   state.lastFm = note.frontmatter || {};
   state.dirty = false;
   $("note-title").textContent = note.title;
+  $("tab-path").textContent = note.rel_path !== note.title + ".md" ? note.rel_path : "";
   $("empty-state").classList.add("hidden");
   applyMode();
   $("editor").value = note.content;
@@ -360,6 +361,7 @@ function closeNoteView() {
   state.current = null;
   state.currentRaw = null;
   $("note-title").textContent = "—";
+  $("tab-path").textContent = "";
   $("editor").value = "";
   $("preview").innerHTML = "";
   $("empty-state").classList.remove("hidden");

@@ -44,7 +44,7 @@
   <div id="app" class="app hidden">
     <div class="topbar">
       <div class="topbar-left">
-        <span class="brand">◆ Oxidian</span>
+        <span class="brand"><span class="diamond">◆</span> Oxidian</span>
         <span id="vault-name" class="vault-name muted"></span>
       </div>
       <div class="topbar-actions">
@@ -85,7 +85,12 @@
       <!-- ---------- Editor tengah ---------- -->
       <section class="editor-pane">
         <div class="editor-head">
-          <span id="note-title" class="note-title">—</span>
+          <div class="tab-strip">
+            <div class="editor-tab">
+              <span id="note-title" class="note-title">—</span>
+              <span id="tab-path" class="tab-path"></span>
+            </div>
+          </div>
           <div class="editor-head-actions">
             <button id="btn-mode" title="Edit / Preview (Ctrl+E)">👁 Preview</button>
           </div>
