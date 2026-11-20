@@ -1,0 +1,13 @@
+[package]
+name = "oxidian-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Vault engine compatible with Obsidian markdown vaults"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+walkdir.workspace = true
+gray_matter.workspace = true
+thiserror.workspace = true

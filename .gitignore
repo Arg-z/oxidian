@@ -1,0 +1,15 @@
+# Rust
+/target
+**/*.rs.bk
+
+# Tauri generated
+**/gen/schemas
+
+# Node (vendor libs sudah di-commit, ini hanya jaga-jaga)
+node_modules/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
