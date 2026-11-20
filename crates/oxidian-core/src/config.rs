@@ -15,10 +15,17 @@ pub struct Config {
     pub last_note: Option<String>,
     #[serde(default = "default_theme")]
     pub theme: String,
+    /// Port MCP server (localhost) — null/absen = matikan MCP.
+    #[serde(default = "default_mcp_port")]
+    pub mcp_port: Option<u16>,
 }
 
 fn default_theme() -> String {
     "dark".into()
+}
+
+fn default_mcp_port() -> Option<u16> {
+    Some(8321)
 }
 
 impl Default for Config {
@@ -28,6 +35,7 @@ impl Default for Config {
             last_vault: None,
             last_note: None,
             theme: default_theme(),
+            mcp_port: default_mcp_port(),
         }
     }
 }

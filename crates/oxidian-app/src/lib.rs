@@ -1,23 +1,27 @@
 //! Oxidian app: shell Tauri di atas [`oxidian_core`].
 //! Semua akses vault lewat commands di sini; UI (HTML/JS statis) manggil via `invoke`.
 
+mod mcp;
 mod watcher;
 
 use oxidian_core::{config::Config, search, vault, VaultIndex};
 use serde::Serialize;
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
 
-/// State vault aktif + config, di-share ke semua commands.
-pub struct AppState {
-    vault: Mutex<Option<ActiveVault>>,
-    config: Mutex<Config>,
+/// State yang dibagi antara GUI (commands) & MCP server — semua akses via Mutex.
+pub struct AppStateInner {
+    pub(crate) vault: Mutex<Option<ActiveVault>>,
+    pub(crate) config: Mutex<Config>,
 }
 
-struct ActiveVault {
-    root: PathBuf,
-    index: VaultIndex,
+/// Alias: state dibungkus Arc supaya bisa di-clone ke thread MCP.
+pub type AppState = Arc<AppStateInner>;
+
+pub(crate) struct ActiveVault {
+    pub(crate) root: PathBuf,
+    pub(crate) index: VaultIndex,
     watcher_stop: Option<std::sync::mpsc::SyncSender<()>>,
 }
 
@@ -48,6 +52,7 @@ struct AppInfo {
     recent_vaults: Vec<String>,
     last_note: Option<String>,
     note_count: usize,
+    mcp_port: Option<u16>,
 }
 
 #[derive(Serialize, Clone)]
@@ -167,6 +172,7 @@ fn app_info_of(state: &State<AppState>) -> AppInfo {
         recent_vaults: cfg.recent_vaults.clone(),
         last_note: cfg.last_note.clone(),
         note_count: n,
+        mcp_port: cfg.mcp_port,
     }
 }
 
@@ -546,10 +552,15 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let config = Config::load();
-            app.manage(AppState {
+            let shared = Arc::new(AppStateInner {
                 vault: Mutex::new(None),
-                config: Mutex::new(config),
+                config: Mutex::new(config.clone()),
             });
+            // MCP server untuk akses agent AI — bind localhost saja
+            if let Some(port) = config.mcp_port {
+                mcp::spawn_server(shared.clone(), port);
+            }
+            app.manage(shared);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

@@ -89,6 +89,41 @@ python3 -m http.server 8123 --bind 127.0.0.1 -d ui
 
 Vault Oxidian **adalah** vault Obsidian: buka folder yang sama di kedua aplikasi dan semuanya bekerja — `.obsidian/` diabaikan (tidak dibaca, tidak ditulis). Yang belum diimplementasi dari Obsidian: plugin system, live-preview WYSIWYG penuh, canvas, sync, mobile.
 
+## 🤖 MCP Server — akses vault lewat AI Agent
+
+Oxidian menyertakan **MCP (Model Context Protocol) server** bawaan — HTTP JSON-RPC di `http://127.0.0.1:8321/mcp` (localhost saja, stateless/streamable, CORS terbuka). AI agent dapat mengoperasikan vault yang sedang terbuka secara live (index langsung di-update, GUI ikut ter-sync lewat file watcher).
+
+**11 tools:**
+
+| Tool | Deskripsi |
+|---|---|
+| `vault_info` | Path vault + jumlah note |
+| `list_notes` | Semua note (judul + path) |
+| `read_note` | Isi markdown mentah satu note |
+| `write_note` | Buat/timpa note (upsert atomik) |
+| `create_note` | Note baru (error bila sudah ada) |
+| `delete_note` | Soft delete → `.trash/` |
+| `search` | Full-text search dengan skor + snippet |
+| `backlinks` | Note yang menaut ke note tertentu |
+| `list_tags` | Semua tag + jumlah |
+| `notes_with_tag` | Note dengan tag tertentu |
+| `graph_summary` | Node/link graph + top terhubung |
+
+**Contoh konfigurasi client** (ZCode, Cline, dan client MCP ber-HTTP lainnya):
+
+```json
+{
+  "mcpServers": {
+    "oxidian": {
+      "type": "http",
+      "url": "http://127.0.0.1:8321/mcp"
+    }
+  }
+}
+```
+
+Port diatur di `~/.config/oxidian/config.json` (`"mcp_port": 8321`; isi `null` untuk mematikan MCP). Server hanya listen di `127.0.0.1` — vault tidak pernah terekspos ke jaringan. Status tampil di statusbar aplikasi.
+
 ## Demo
 
 Vault contoh ada di `/data/workspace/vault-demo` — buka lewat tombol *Vault…* atau otomatis saat aplikasi start.

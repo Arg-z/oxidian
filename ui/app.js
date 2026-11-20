@@ -143,6 +143,9 @@ async function enterVault(vaultPath, lastNote) {
   state.treeOpen.clear();
   $("vault-name").textContent = vaultPath.split("/").pop();
   $("status-vault").textContent = `${vaultPath}`;
+  cmd("app_info").then((i) => {
+    $("status-mcp").textContent = i.mcp_port ? `MCP: 127.0.0.1:${i.mcp_port}` : "";
+  }).catch(() => {});
   await refreshNotesCache();
   await renderTree();
   await renderTags();

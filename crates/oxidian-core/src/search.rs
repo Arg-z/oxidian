@@ -121,18 +121,55 @@ fn first_line(body: &str) -> String {
         .collect()
 }
 
+/// Cari byte-index terdekat yang merupakan char boundary (maju).
+fn ceil_boundary(s: &str, mut i: usize) -> usize {
+    while i < s.len() && !s.is_char_boundary(i) {
+        i += 1;
+    }
+    i
+}
+
+/// Pencarian case-insensitive yang mengembalikan byte-offset di `hay`
+/// (aman untuk unicode yang panjang lowercase-nya berubah, mis. İ/ß).
+fn find_ci(hay: &str, needle_lower: &str) -> Option<usize> {
+    if hay.len() == hay.to_lowercase().len() {
+        return hay.to_lowercase().find(needle_lower);
+    }
+    let hay_chars: Vec<(usize, char)> = hay.char_indices().collect();
+    let needle_chars: Vec<char> = needle_lower.chars().collect();
+    if needle_chars.is_empty() {
+        return Some(0);
+    }
+    for start in 0..hay_chars.len() {
+        let mut mi = 0usize;
+        let mut j = start;
+        while mi < needle_chars.len() && j < hay_chars.len() {
+            let mut lowered = hay_chars[j].1.to_lowercase();
+            if lowered.next() == Some(needle_chars[mi]) {
+                mi += 1;
+                j += 1;
+            } else {
+                break;
+            }
+        }
+        if mi == needle_chars.len() {
+            return Some(hay_chars[start].0);
+        }
+    }
+    None
+}
+
 /// Potongan ±60 karakter di sekitar kecocokan pertama (case-insensitive).
 fn snippet_around(body: &str, q_lower: &str) -> String {
-    let lower = body.to_lowercase();
-    let Some(pos) = lower.find(q_lower) else {
+    let Some(pos) = find_ci(body, q_lower) else {
         return first_line(body);
     };
-    let mut start = pos.saturating_sub(40);
+    let mut start = ceil_boundary(body, pos.saturating_sub(40));
     // geser ke word boundary supaya tidak terpotong di tengah kata
     if let Some(o) = body[start..].find(' ') {
         start += o + 1;
     }
-    let end = (pos + q_lower.len() + 60).min(body.len());
+    let end = ceil_boundary(body, (pos + q_lower.len() + 60).min(body.len()));
     let s: String = body[start..end].replace(['\n', '\r'], " ");
     let mut out = String::new();
     if start > 0 {
@@ -188,6 +225,27 @@ mod tests {
     }
 
     #[test]
+    #[test]
+    fn snippet_tidak_panik_di_multibyte() {
+        // em-dash (3 byte) di sekitar posisi kecocokan — dulu panic char boundary
+        let ns = notes(&[(
+            "a.md",
+            "Tautan cepat: — Rust — panjang sekali teksnya — kunci rahasia ada di tengah — selesai",
+        )]);
+        let hits = search(&ns, "rahasia");
+        assert_eq!(hits.len(), 1);
+        assert!(hits[0].snippet.contains("rahasia"));
+    }
+
+    #[test]
+    fn snippet_unicode_lowercase_mengubah_panjang() {
+        // İ (2 byte) → i̇ (3+ byte): offset lowercase tidak valid di body asli
+        let ns = notes(&[("a.md", "İstanbul — kata KUNCI ada di sini — penutup")]);
+        let hits = search(&ns, "kunci");
+        assert_eq!(hits.len(), 1);
+        assert!(hits[0].snippet.contains("KUNCI"));
+    }
+
     fn tag_kebaca() {
         let ns = notes(&[("a.md", "#project"), ("b.md", "biasa saja")]);
         let hits = search(&ns, "project");
