@@ -1,6 +1,6 @@
 # Oxidian
 
-**Aplikasi pencatatan Markdown yang ditulis 100% di Rust** — kompatibel dengan vault [Obsidian](https://obsidian.md). Data Anda adalah file `.md` biasa; tidak ada format proprietary, tidak ada kode Obsidian yang dipakai (clean-room implementation di atas format vault publik).
+**Aplikasi pencatatan Markdown yang ditulis 100% di Rust** — kompatibel dengan vault [Obsidian](https://obsidian.md). Data Anda adalah file `.md` biasa; tidak ada format proprietary. Implementasi ditulis dari nol berdasarkan format vault yang terbuka dan perilaku yang terdokumentasi secara publik — tidak ada kode Obsidian yang dipakai.
 
 ![Oxidian](crates/oxidian-app/icons/icon.png)
 
