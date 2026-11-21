@@ -27,6 +27,12 @@
 | Tab = indentasi 2 spasi di editor | ✅ |
 | Config aplikasi di `~/.config/oxidian/` (vault & note terakhir) — vault tetap Markdown murni | ✅ |
 
+## Screenshot
+
+| Utama | Tema gelap | Graph view |
+|---|---|---|
+| ![Utama](screenshots/utama.png) | ![Gelap](screenshots/dark.png) | ![Graph](screenshots/graph.png) |
+
 ## Arsitektur
 
 ```
@@ -43,7 +49,7 @@ crates/
 ui/                   # Frontend statis tanpa bundler
     ├── index.html     # Layout 3-panel ala Obsidian
     ├── app.js         # Logika UI, preview pipeline, autocomplete, graph canvas
-    ├── style.css      # Tema gelap aksen ungu
+    ├── style.css      # Tema terang/gelap, aksen biru
     └── vendor/        # marked.min.js, purify.min.js (di-vendor)
 ```
 
@@ -51,17 +57,36 @@ ui/                   # Frontend statis tanpa bundler
 
 ## Menjalankan
 
+### Linux (Debian/Ubuntu)
+
 ```bash
-# dependensi (Debian/Ubuntu)
 sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev \
                  librsvg2-dev pkg-config build-essential
-
-# build & run
 cargo run
+```
 
-# test
+### Windows
+
+Prasyarat: [Rust stable](https://rustup.rs/) + Visual Studio Build Tools (komponen C++). WebView2 sudah bawaan Windows 10/11, jadi langsung:
+
+```powershell
+cargo run
+```
+
+### macOS
+
+```bash
+xcode-select --install   # sekali saja
+cargo run
+```
+
+### Test
+
+```bash
 cargo test -p oxidian-core
 ```
+
+### Tips
 
 Di VM tanpa GPU, pakai software rendering bila layar hitam:
 ```bash
@@ -126,4 +151,8 @@ Port diatur di `~/.config/oxidian/config.json` (`"mcp_port": 8321`; isi `null` u
 
 ## Demo
 
-Vault contoh ada di `/data/workspace/vault-demo` — buka lewat tombol *Vault…* atau otomatis saat aplikasi start.
+Jalankan aplikasi, lalu buka folder mana pun sebagai vault lewat tombol *Vault…* — jika belum ada vault tersimpan, aplikasi membuka vault contoh secara otomatis.
+
+## Lisensi
+
+MIT — lihat [LICENSE](LICENSE).
